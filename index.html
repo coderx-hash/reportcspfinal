@@ -243,16 +243,70 @@
         .del-icon { color: #cbd5e1; cursor: pointer; transition: 0.2s; }
         .del-icon:hover { color: var(--brand-red); }
 
-        /* National Summary Mini-Table */
+        /* --- UPDATED NATIONAL SUMMARY SECTION --- */
         .national-area { 
-            background: #f8fafc; padding: 15px 25px; border-top: 1px solid #e2e8f0;
-            display: flex; flex-direction: column; max-height: 180px;
+            background: #f8fafc; 
+            padding: 20px 25px; 
+            border-top: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; 
+            height: 200px; /* Fixed height for consistency */
         }
-        .nat-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--brand-blue); margin-bottom: 10px; }
-        .nat-list { overflow-y: auto; display: flex; flex-wrap: wrap; gap: 10px; }
-        .nat-item { 
-            background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px;
-            font-size: 12px; display: flex; align-items: center; gap: 8px;
+        .nat-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+        
+        /* Scrolling Card Container */
+        .nat-list { 
+            overflow-x: auto; 
+            display: flex; 
+            gap: 16px; 
+            padding-bottom: 10px; /* Space for scrollbar */
+            flex-wrap: nowrap;
+        }
+        /* Custom Scrollbar */
+        .nat-list::-webkit-scrollbar { height: 6px; }
+        .nat-list::-webkit-scrollbar-track { background: transparent; }
+        .nat-list::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+        /* New Card Design */
+        .nat-card { 
+            background: white; 
+            border: 1px solid #e2e8f0; 
+            padding: 16px; 
+            border-radius: 12px;
+            min-width: 180px; 
+            max-width: 220px;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .nat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--brand-blue);
+        }
+
+        /* Card Internals */
+        .nc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .nc-code { font-weight: 700; color: var(--brand-blue); font-size: 13px; }
+        .nc-uom { font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; }
+        
+        .nc-qty { 
+            font-family: 'Outfit', sans-serif; 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            line-height: 1.2;
+        }
+        
+        .nc-name { 
+            font-size: 11px; 
+            color: #64748b; 
+            margin-top: 8px; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
         }
 
         .hidden { display: none !important; }
@@ -355,7 +409,7 @@
                     </div>
                     
                     <div class="national-area">
-                        <div class="nat-title">National Aggregation (Live)</div>
+                        <div class="nat-title">National Aggregation (Summary)</div>
                         <div class="nat-list" id="nationalList">
                             </div>
                     </div>
@@ -525,18 +579,24 @@
             document.getElementById('totalGoodStock').innerText = goodStockTotal.toLocaleString();
             document.getElementById('totalBadStock').innerText = badStockTotal.toLocaleString();
 
-            // Render National Summary (Cards style)
+            // Render National Summary (NEW CARD DESIGN)
             let natList = Object.keys(nationalSummary).map(key => ({ code: key, ...nationalSummary[key] }));
             natList.sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
 
             let natHTML = '';
             natList.forEach(item => {
+                // Ensure text safety
+                let safeName = item.name ? item.name : '';
+                let safeUom = item.uom ? item.uom : '';
+
                 natHTML += `
-                <div class="nat-item">
-                    <span style="font-weight:700; color:var(--brand-blue)">${item.code}</span>
-                    <span style="color:#64748b">${item.name.substring(0, 15)}..</span>
-                    <span style="font-weight:800; color:var(--text-main)">${item.totalQty}</span>
-                    <span style="font-size:10px; color:#94a3b8">${item.uom}</span>
+                <div class="nat-card">
+                    <div class="nc-top">
+                        <span class="nc-code">${item.code}</span>
+                        <span class="nc-uom">${safeUom}</span>
+                    </div>
+                    <div class="nc-qty">${item.totalQty.toLocaleString()}</div>
+                    <div class="nc-name" title="${safeName}">${safeName}</div>
                 </div>`;
             });
             document.getElementById('nationalList').innerHTML = natHTML;
