@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventory OS - Completesolution</title>
     
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -209,8 +209,21 @@
             display: inline-flex; align-items: center; gap: 10px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             transition: 0.2s;
+            cursor: pointer; /* Important for mobile tap */
+            position: relative;
+            z-index: 10;
         }
         .btn-browse:hover { background: var(--brand-blue); box-shadow: 0 10px 25px var(--primary-glow); }
+
+        /* FIXED: Mobile friendly file input style */
+        .file-input-hidden {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
 
         /* --- DASHBOARD VIEW --- */
         #dashboardView { display: flex; flex-direction: column; height: 100%; }
@@ -385,6 +398,16 @@
 
         .hidden { display: none !important; }
 
+        /* Responsive Fixes */
+        @media (max-width: 768px) {
+            .app-shell { width: 100%; height: 100vh; border-radius: 0; border: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .toolbar-area { flex-direction: column; gap: 10px; align-items: stretch; }
+            .search-container { width: 100%; }
+            .top-bar { padding: 15px; }
+            .intro-title { font-size: 32px; }
+        }
+
     </style>
 </head>
 <body>
@@ -410,14 +433,16 @@
     <div class="app-shell" id="appShell">
         
         <div id="uploaderView">
-            <div class="drop-zone">
+            <div class="drop-zone" onclick="document.getElementById('excelInput').click()">
                 <div class="upload-icon-circle"><i class="fas fa-cloud-upload-alt"></i></div>
                 <h1 class="upload-h1">Import Inventory</h1>
                 <p class="upload-p">Drag and drop your Excel file here.<br>We'll auto-detect expiration & bad stocks.</p>
+                
                 <label for="excelInput" class="btn-browse">
                     <i class="fas fa-folder-open"></i> Select Excel File
                 </label>
-                <input type="file" id="excelInput" accept=".xlsx, .xls" style="display:none;">
+                <input type="file" id="excelInput" accept=".xlsx, .xls" class="file-input-hidden">
+                
             </div>
             <div style="margin-top: 30px; font-size: 11px; color: var(--text-light); font-weight: 700; letter-spacing: 1px;">DESIGNED BY GELO</div>
         </div>
@@ -458,7 +483,7 @@
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" id="searchInput" class="search-input" placeholder="Filter by branch, code, or item name..." onkeyup="filterData()">
                     </div>
-                    <div style="display: flex; gap: 12px;">
+                    <div style="display: flex; gap: 12px; margin-top: 10px;">
                         <button onclick="location.reload()" class="action-btn btn-ghost">
                             <i class="fas fa-redo-alt"></i> Reset
                         </button>
@@ -527,6 +552,8 @@
         // --- FILE HANDLING ---
         document.getElementById('excelInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
+            if (!file) return; // Fix for cancel button
+            
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
