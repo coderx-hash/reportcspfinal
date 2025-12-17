@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUN_PHARMA // SORT & CALCULATE</title>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(45, 212, 191, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .tech-panel {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .custom-scroll { overflow: auto; }
+        .custom-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border: 2px solid #1e293b; border-radius: 4px; }
+        
+        table { border-collapse: collapse; min-width: 100%; }
+        td { 
+            border: 1px solid #334155; 
+            padding: 6px 10px; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 12px;
+            white-space: nowrap;
+            color: #e2e8f0;
+        }
+
+        /* Highlight Sorted Column */
+        .sorted-col {
+            background-color: rgba(45, 212, 191, 0.1);
+            color: #2dd4bf;
+        }
+        
+        .row-total td {
+            background-color: #0f766e !important; 
+            color: white !important;
+            font-weight: bold;
+            border-top: 2px solid #2dd4bf;
+            font-size: 14px;
+        }
+
+        /* Debug/Status Log */
+        #statusLog {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="bg-grid"></div>
+
+    <div class="max-w-7xl mx-auto w-full h-full flex flex-col gap-4">
+        
+        <header class="flex justify-between items-center tech-panel p-4 rounded-xl shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-teal-500/10 rounded border border-teal-500/20">
+                    <svg class="w-6 h-6 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">INVENTORY SORTER & CALC</h1>
+                    <p class="text-xs text-teal-400 font-mono">SORTS BY LOCATION/CODE + TOTALS QTY</p>
+                </div>
+            </div>
+            
+            <div id="actionPanel" class="hidden flex items-center gap-4">
+                <div class="text-right mr-4">
+                    <p class="text-[10px] text-slate-400 font-mono uppercase">Grand Total</p>
+                    <p id="totalDisplay" class="text-xl font-bold text-teal-400">0</p>
+                </div>
+                <button id="downloadBtn" class="bg-teal-600 hover:bg-teal-500 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-teal-900/20 transition-all">
+                    DOWNLOAD SORTED FILE
+                </button>
+            </div>
+        </header>
+
+        <div id="dropZone" class="flex-1 tech-panel rounded-xl border-2 border-dashed border-slate-600 flex flex-col items-center justify-center cursor-pointer hover:border-teal-500/50 hover:bg-slate-800/50 transition-all relative">
+            <input type="file" id="fileInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Click to upload" accept=".xlsx, .xls, .csv">
+            
+            <div class="z-10 text-center pointer-events-none">
+                <svg class="w-16 h-16 text-slate-400 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <h3 class="text-xl font-bold text-white">CLICK HERE TO UPLOAD</h3>
+                <p class="text-sm text-slate-400 mt-2">Filters: Expired/Damage • Sorts: Location/Code</p>
+                <p id="statusLog">Waiting for file...</p>
+            </div>
+        </div>
+
+        <div id="previewArea" class="hidden flex-1 tech-panel rounded-xl overflow-hidden flex flex-col">
+            <div class="p-2 bg-slate-800/80 border-b border-slate-700 text-xs font-mono text-slate-400 flex justify-between">
+                <span>>> PREVIEW (Sorted A-Z)</span>
+                <span id="sortInfo" class="text-teal-500"></span>
+            </div>
+            <div class="flex-1 custom-scroll bg-slate-900">
+                <table id="previewTable"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone'); // For visual only
+        const previewArea = document.getElementById('previewArea');
+        const previewTable = document.getElementById('previewTable');
+        const actionPanel = document.getElementById('actionPanel');
+        const totalDisplay = document.getElementById('totalDisplay');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusLog = document.getElementById('statusLog');
+        const sortInfo = document.getElementById('sortInfo');
+
+        let finalDataArray = [];
+        
+        // --- Keywords ---
+        // 1. DELETE Rows containing:
+        const BAD_KEYWORDS = ["EXPIRED", "QUARANTINE", "DAMAGE"];
+        
+        // 2. SUM Columns containing:
+        const SUM_KEYWORDS = ["QTY", "QUANTITY", "BALANCE", "STOCK", "SOH"];
+        
+        // 3. IGNORE Summing columns containing:
+        const IGNORE_KEYWORDS = ["BATCH", "LOT", "CODE", "ID", "NO.", "EXPIRY", "PRICE", "COST"];
+
+        // 4. SORT by columns containing:
+        const SORT_KEYWORDS = ["LOCATION", "LOC", "BIN", "RACK", "AREA", "CODE", "STOCK CODE"];
+
+        // --- File Handling ---
+        // Using 'change' on input directly is more reliable than custom drag/drop listeners for some browsers
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                statusLog.innerText = ">> Reading file... Please wait.";
+                statusLog.style.color = "#2dd4bf"; // Teal
+                // Small delay to let UI update
+                setTimeout(() => processFile(e.target.files[0]), 100);
+            }
+        });
+
+        // Add visual effect when dragging over the label (handled by CSS hover mostly, but this helps)
+        fileInput.addEventListener('dragenter', () => dropZone.classList.add('border-teal-500', 'bg-slate-800'));
+        fileInput.addEventListener('dragleave', () => dropZone.classList.remove('border-teal-500', 'bg-slate-800'));
+        fileInput.addEventListener('drop', () => dropZone.classList.remove('border-teal-500', 'bg-slate-800'));
+
+        function processFile(file) {
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                statusLog.innerText = ">> ERROR: Could not read file.";
+                statusLog.style.color = "#f43f5e";
+            };
+
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    // raw: false ensures we read "1,000" as text to keep format, handled later for math
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, {
+                        header: 1, 
+                        defval: "", 
+                        raw: false 
+                    });
+
+                    // --- STEP 1: FIND HEADER ---
+                    let headerIndex = -1;
+                    let qtyColIndices = [];
+                    let sortColIndex = -1;
+                    let sortColName = "";
+
+                    // Scan first 30 rows
+                    for(let i = 0; i < Math.min(rawData.length, 30); i++) {
+                        const row = rawData[i];
+                        const rowStr = row.join(' ').toUpperCase();
+
+                        // Heuristic: If row has "QTY" or "STOCK", it's likely header
+                        if (SUM_KEYWORDS.some(k => rowStr.includes(k))) {
+                            
+                            // Check columns individually
+                            row.forEach((cell, idx) => {
+                                if(!cell) return;
+                                const hStr = String(cell).toUpperCase();
+
+                                // Identify Sum Columns
+                                if(SUM_KEYWORDS.some(k => hStr.includes(k)) && !IGNORE_KEYWORDS.some(k => hStr.includes(k))) {
+                                    qtyColIndices.push(idx);
+                                }
+
+                                // Identify Sort Column (First match priority)
+                                if(sortColIndex === -1 && SORT_KEYWORDS.some(k => hStr.includes(k))) {
+                                    sortColIndex = idx;
+                                    sortColName = cell;
+                                }
+                            });
+
+                            if(qtyColIndices.length > 0) {
+                                headerIndex = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(headerIndex === -1) {
+                        statusLog.innerText = ">> ERROR: Could not find header row (QTY/STOCK).";
+                        statusLog.style.color = "#f43f5e";
+                        return;
+                    }
+
+                    // --- STEP 2: SEPARATE HEADER & BODY ---
+                    // Everything before header + header itself
+                    const topSection = rawData.slice(0, headerIndex + 1);
+                    // The data rows
+                    let bodyRows = rawData.slice(headerIndex + 1);
+
+                    // --- STEP 3: CLEAN BODY (Remove Expired/Damage) ---
+                    bodyRows = bodyRows.filter(row => {
+                        const rowStr = row.join(' ').toUpperCase();
+                        // Keep if NOT expired/damage AND not empty
+                        return !BAD_KEYWORDS.some(k => rowStr.includes(k)) && rowStr.trim().length > 0;
+                    });
+
+                    // --- STEP 4: SORTING LOGIC ---
+                    if (sortColIndex !== -1) {
+                        statusLog.innerText = `>> Sorting by: ${sortColName}...`;
+                        sortInfo.innerText = `SORTED BY: ${sortColName}`;
+                        
+                        bodyRows.sort((a, b) => {
+                            const valA = String(a[sortColIndex] || "").toUpperCase();
+                            const valB = String(b[sortColIndex] || "").toUpperCase();
+                            return valA.localeCompare(valB, undefined, {numeric: true, sensitivity: 'base'});
+                        });
+                    } else {
+                        sortInfo.innerText = "NO SORT COLUMN DETECTED";
+                    }
+
+                    // --- STEP 5: CALCULATE TOTALS ---
+                    let colTotals = {};
+                    qtyColIndices.forEach(idx => colTotals[idx] = 0);
+
+                    bodyRows.forEach(row => {
+                        qtyColIndices.forEach(colIdx => {
+                            let val = row[colIdx];
+                            if (val) {
+                                let cleanVal = String(val).replace(/,/g, '');
+                                let num = parseFloat(cleanVal);
+                                if (!isNaN(num)) colTotals[colIdx] += num;
+                            }
+                        });
+                    });
+
+                    // --- STEP 6: CREATE TOTAL ROW ---
+                    let rowWidth = topSection[headerIndex].length;
+                    let totalRow = new Array(rowWidth).fill("");
+                    
+                    totalRow[0] = "GRAND TOTAL";
+                    let grandTotalPreview = "0";
+
+                    qtyColIndices.forEach(colIdx => {
+                        let formattedTotal = colTotals[colIdx].toLocaleString('en-US', {
+                            minimumFractionDigits: 0, 
+                            maximumFractionDigits: 2
+                        });
+                        totalRow[colIdx] = formattedTotal;
+                        if(grandTotalPreview === "0") grandTotalPreview = formattedTotal;
+                    });
+
+                    // --- STEP 7: MERGE ALL ---
+                    finalDataArray = [...topSection, ...bodyRows, new Array(rowWidth).fill(""), totalRow];
+
+                    // --- UI UPDATE ---
+                    dropZone.style.display = 'none'; // Hide uploader
+                    previewArea.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
+                    totalDisplay.innerText = grandTotalPreview;
+
+                    renderPreview(finalDataArray, sortColIndex);
+                    
+                } catch (err) {
+                    console.error(err);
+                    statusLog.innerText = ">> CRITICAL ERROR: File format incompatible.";
+                    statusLog.style.color = "#f43f5e";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderPreview(data, highlightIdx) {
+            previewTable.innerHTML = "";
+            const limit = Math.min(data.length, 100); 
+
+            // Only render first 100 for speed
+            for(let i=0; i<limit; i++) {
+                const tr = document.createElement('tr');
+                
+                // Style the last row if it's the Total Row
+                if (i === data.length - 1 && data[i][0] === "GRAND TOTAL") {
+                    tr.className = "row-total";
+                }
+
+                data[i].forEach((cell, idx) => {
+                    const td = document.createElement('td');
+                    td.innerText = cell;
+                    if(idx === highlightIdx) td.classList.add('sorted-col');
+                    tr.appendChild(td);
+                });
+                previewTable.appendChild(tr);
+            }
+            
+            if (data.length > 100) {
+                 const tr = document.createElement('tr');
+                 tr.innerHTML = `<td colspan="100" style="text-align:center; padding:10px; color:#64748b;">... ${data.length - 100} ROWS HIDDEN (INCLUDED IN DOWNLOAD) ...</td>`;
+                 previewTable.appendChild(tr);
+                 
+                 // Show total row even if hidden
+                 const totalRowData = data[data.length-1];
+                 const trTotal = document.createElement('tr');
+                 trTotal.className = "row-total";
+                 totalRowData.forEach(cell => {
+                     const td = document.createElement('td');
+                     td.innerText = cell;
+                     trTotal.appendChild(td);
+                 });
+                 previewTable.appendChild(trTotal);
+            }
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (!finalDataArray.length) return;
+
+            const newSheet = XLSX.utils.aoa_to_sheet(finalDataArray);
+            const newWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWorkbook, newSheet, "Sorted Inventory");
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-');
+            let timeStr = now.toLocaleTimeString('en-US', {hour12: true}).replace(/:/g, ".");
+            const fileName = `SUN PHARMA SORTED ${dateStr} ${timeStr}.xlsx`;
+
+            XLSX.writeFile(newWorkbook, fileName);
+        });
+    </script>
+</body>
+</html>
