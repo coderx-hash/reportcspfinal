@@ -3,280 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gelo's Inventory System</title>
+    <title>Pro Inventory Manager</title>
     
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Tahoma&display=swap" rel="stylesheet">
     
     <style>
-        /* --- GLOBAL STYLES --- */
-        * { box-sizing: border-box; }
+        /* --- GLOBAL RESET --- */
+        * { box-sizing: border-box; outline: none; }
         
         body { 
-            font-family: 'Tahoma', sans-serif; /* STRICT TAHOMA */
-            margin: 0; 
-            padding: 0;
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; padding: 0;
             color: #333;
-            background: #eef2f5;
+            background: #f4f7f6;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Center Vertically */
-            align-items: center;     /* Center Horizontally */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* --- BACKGROUND ANIMATION --- */
+        /* --- 1. CINEMATIC INTRO (RESTORED MOVEMENT) --- */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        /* Container for the Icon to ensure centering */
+        .logo-container {
+            margin-bottom: 25px;
+            perspective: 1000px;
+        }
+
+        /* The Moving Icon */
+        .medical-cross {
+            font-size: 80px; 
+            color: #0056b3; /* BLUE */
+            /* THIS IS THE MOVEMENT: Spin, Scale, and Fade In */
+            animation: spinAndScale 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+            opacity: 0; 
+        }
+
+        .intro-title {
+            font-size: 32px; font-weight: 900; 
+            color: #0056b3; /* BLUE */
+            text-transform: uppercase; letter-spacing: 2px;
+            opacity: 0; 
+            animation: slideUpFade 1s ease-out forwards 0.5s; /* Delays text appearance */
+        }
+
+        .intro-sub {
+            font-size: 14px; color: #666; margin-top: 5px; letter-spacing: 1px;
+            opacity: 0; 
+            animation: slideUpFade 1s ease-out forwards 0.8s;
+        }
+
+        /* Keyframes for Intro Movement */
+        @keyframes spinAndScale {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            60% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes slideUpFade {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- 2. BACKGROUND PARTICLES (MOVING) --- */
         .bg-animation {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
         }
         .bg-icon {
-            position: absolute; 
-            color: rgba(0, 86, 179, 0.08);
-            bottom: -100px;
-            animation: floatUp linear infinite;
+            position: absolute; color: rgba(0, 86, 179, 0.08);
+            animation: floatUp 25s linear infinite; bottom: -150px;
         }
         @keyframes floatUp {
             0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
             100% { transform: translateY(-110vh) rotate(360deg) scale(1.2); opacity: 0; }
         }
 
-        /* --- FLOATING CARD --- */
-        .floating-card {
-            background: white;
+        /* --- 3. MAIN GLASS CARD --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 1000px; 
-            padding: 50px;
-            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            width: 95%; max-width: 1200px;
+            padding: 40px; margin: 40px auto;
             position: relative;
-            animation: slideUp 0.8s ease-out;
-            margin: 40px auto; 
+            /* Entrance Animation */
+            animation: fadeInCard 1s ease-out 2.8s backwards; 
         }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeInCard { 
+            from { opacity: 0; transform: translateY(40px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         /* --- UPLOADER --- */
-        .uploader-content { text-align: center; }
-        .upload-icon { 
-            font-size: 80px; 
-            background: linear-gradient(45deg, #0056b3, #00d2ff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 5px 15px rgba(0, 86, 179, 0.2));
-        }
+        .uploader-content { text-align: center; padding: 40px; }
+        .upload-icon { font-size: 60px; color: #0056b3; margin-bottom: 20px; }
         .btn-upload { 
-            background: linear-gradient(90deg, #0056b3, #004494);
+            background: linear-gradient(135deg, #0056b3, #004494);
             color: white; padding: 15px 50px; 
-            border-radius: 50px; cursor: pointer; font-weight: bold; 
-            display: inline-block; margin-top: 25px; 
-            font-size: 16px; letter-spacing: 1px;
-            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.3); transition: all 0.3s;
+            border-radius: 50px; cursor: pointer; font-weight: 600; 
+            display: inline-block; margin-top: 20px; 
+            box-shadow: 0 10px 20px rgba(0, 86, 179, 0.2); 
+            transition: all 0.3s ease;
         }
-        .btn-upload:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 35px rgba(0, 86, 179, 0.4); }
+        .btn-upload:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 86, 179, 0.3); }
         input[type="file"] { display: none; }
 
-        /* --- DASHBOARD STATS --- */
+        /* --- HEADER & TOOLBAR --- */
+        .report-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        .logo-main { font-size: 28px; font-weight: 900; color: #0056b3; }
+        .logo-sub { color: #dc3545; }
+        .report-info { font-size: 13px; font-weight: 700; color: #444; margin-top: 5px; font-family: Tahoma, sans-serif; }
+
+        .toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; gap: 20px; flex-wrap: wrap;
+        }
+        .search-box { position: relative; flex: 1; min-width: 300px; }
+        .search-box input {
+            width: 100%; padding: 12px 20px 12px 45px;
+            border-radius: 30px; border: 1px solid #ddd;
+            font-family: 'Poppins', sans-serif; font-size: 14px;
+            background: #f9f9f9; transition: 0.3s;
+        }
+        .search-box input:focus { background: white; border-color: #0056b3; box-shadow: 0 0 10px rgba(0, 86, 179, 0.1); }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn-action { 
+            border: none; padding: 10px 25px; cursor: pointer; 
+            border-radius: 30px; font-weight: 600; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-excel { background: #107c41; color: white; } 
+        .btn-reset { background: white; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* --- DASHBOARD --- */
         .dashboard-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px; margin-bottom: 30px;
         }
         .stat-card {
-            background: #f8f9fa; padding: 25px; border-radius: 15px;
-            border-left: 6px solid #ccc; 
+            padding: 25px; border-radius: 15px; color: white;
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        .card-blue { border-left-color: #0056b3; background: #e3f2fd; }
-        .card-red { border-left-color: #dc3545; background: #ffebee; }
-        .stat-info h3 { margin: 0; font-size: 12px; text-transform: uppercase; color: #555; letter-spacing: 1px; font-weight: bold; }
-        .stat-info p { margin: 5px 0 0; font-size: 28px; font-weight: 800; color: #333; }
+        .card-blue { background: linear-gradient(135deg, #0061f2, #60efff); }
+        .card-red { background: linear-gradient(135deg, #eb3349, #f45c43); }
+        .stat-info h3 { margin: 0; font-size: 12px; opacity: 0.9; text-transform: uppercase; }
+        .stat-info p { margin: 5px 0 0; font-size: 28px; font-weight: 800; }
+        .stat-icon { font-size: 40px; opacity: 0.3; }
 
         /* --- TABLE STYLES --- */
-        .table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px; }
-
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            font-family: 'Tahoma', sans-serif;
-            min-width: 800px;
+        .table-container {
+            width: 100%; max-height: 500px; overflow: auto;
+            border-radius: 10px; border: 1px solid #eee;
+            background: white; margin-bottom: 30px;
         }
-
-        /* HEADER: BOLD TAHOMA 8 */
-        th { 
-            background-color: #FFFF00; 
-            border: 1px solid #333; 
-            padding: 8px; 
-            text-align: center; 
-            color: #000;
-            font-family: 'Tahoma', sans-serif;
-            font-size: 8pt; 
-            font-weight: bold; 
+        table { width: 100%; border-collapse: collapse; font-family: 'Tahoma', sans-serif; min-width: 900px; }
+        
+        thead th {
+            position: sticky; top: 0; z-index: 10;
+            background-color: #FFFF00; /* Yellow */
+            padding: 12px; font-size: 11px; font-weight: 800; color: #000;
+            text-align: center; border-bottom: 2px solid #ccc;
+            text-transform: uppercase;
         }
-
-        /* DATA: UNBOLD TAHOMA 8 */
         td { 
-            border: 1px solid #333; 
-            padding: 6px; 
-            vertical-align: middle;
-            font-family: 'Tahoma', sans-serif;
-            font-size: 8pt; 
-            font-weight: normal; /* Force Unbold */
+            padding: 10px; font-size: 11px; color: #333; 
+            border-bottom: 1px solid #f0f0f0; vertical-align: middle;
         }
+        tr:hover { background-color: #f8f9fa; }
 
-        .total-row { background-color: #e9ecef; font-weight: bold; font-size: 9pt; }
+        .text-red { color: #dc3545; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .total-row { background-color: #eef2f3; font-weight: bold; font-size: 13px; }
+
+        .btn-delete {
+            background: none; border: none; color: #dc3545;
+            cursor: pointer; font-size: 14px; opacity: 0.6; transition: 0.2s;
+        }
+        .btn-delete:hover { opacity: 1; transform: scale(1.2); }
+
+        .section-title {
+            font-size: 14px; font-weight: 800; color: #0056b3; 
+            margin-bottom: 15px; display: inline-block; border-bottom: 2px solid #0056b3;
+            font-family: Tahoma, sans-serif; letter-spacing: 1px;
+        }
+
+        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #888; font-weight: 600; }
         .hidden { display: none; }
-
-        /* --- CONTROLS --- */
-        .controls { display: none; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .btn-action { 
-            border: none; padding: 12px 30px; cursor: pointer; 
-            border-radius: 30px; font-weight: bold; font-size: 13px;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
-        }
-        .btn-excel { background: #107c41; color: white; } 
-        .btn-reset { background: white; color: #dc3545; border: 2px solid #dc3545; }
-        .btn-action:hover { transform: translateY(-2px); }
-
-        /* --- FOOTER --- */
-        .footer { 
-            margin-top: 40px; padding-bottom: 20px;
-            font-size: 10px; color: #999; 
-            font-weight: bold; letter-spacing: 1px; text-align: center;
-        }
-        
-        /* INTRO OVERLAY */
-        #intro-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #fff; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 1s ease-out;
-        }
-        .intro-logo {
-            font-size: 40px; font-weight: 900; color: #0056b3;
-            text-transform: uppercase; letter-spacing: 2px;
-            animation: popIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        .intro-sub {
-            font-size: 16px; color: #666; margin-top: 10px; font-weight: normal;
-            opacity: 0; animation: fadeIn 1s ease-in forwards 0.5s;
-        }
-        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes fadeIn { to { opacity: 1; } }
 
     </style>
 </head>
 <body>
 
     <div id="intro-overlay">
-        <div class="intro-logo">Completesolution <span style="color:#d32f2f">Pharmacy</span></div>
-        <div class="intro-sub">Smart Inventory System</div>
+        <div class="logo-container">
+            <i class="fas fa-prescription medical-cross"></i>
+        </div>
+        <div class="intro-title">Completesolution <span style="color:#dc3545">Pharmacy</span></div>
+        <div class="intro-sub">Intelligent Inventory System v3.0</div>
     </div>
 
     <div class="bg-animation" id="bgAnimation"></div>
 
-    <div class="floating-card" id="mainCard">
+    <div class="glass-card" id="mainCard">
         
         <div id="uploaderState" class="uploader-content">
-            <i class="fas fa-file-invoice upload-icon"></i>
-            <h2 style="margin: 10px 0; color: #333; font-weight:800; font-size: 28px;">INVENTORY DASHBOARD</h2>
-            <p style="color: #666; font-size: 14px; margin-bottom: 40px; font-family: Tahoma;">
-                Please upload your inventory file to begin.<br>
-                <span style="font-size: 11px; opacity: 0.7;">(Settings: Tahoma 8, Bold Headers, Unbold Data)</span>
+            <i class="fas fa-file-medical-alt upload-icon"></i>
+            <h2 style="margin: 0; color: #333; font-weight:800;">INVENTORY DASHBOARD</h2>
+            <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                Upload Excel file to process.<br>
+                Auto-removes: Expired, Damage, Reject.
             </p>
-            
-            <label for="excelInput" class="btn-upload">
-                <i class="fas fa-cloud-upload-alt"></i> UPLOAD EXCEL FILE
-            </label>
+            <label for="excelInput" class="btn-upload"><i class="fas fa-folder-open"></i> &nbsp; Select File</label>
             <input type="file" id="excelInput" accept=".xlsx, .xls">
         </div>
 
         <div id="reportState" class="hidden">
             
-            <div class="controls" id="controlBox">
-                <button onclick="exportReportToExcel()" class="btn-action btn-excel">
-                    <i class="fas fa-download"></i> Download Excel
-                </button>
-                <button onclick="location.reload()" class="btn-action btn-reset">
-                    <i class="fas fa-redo"></i> Reset / New
-                </button>
+            <div class="report-header">
+                <div class="logo-main">Completesolution <span class="logo-sub">Pharmacy</span></div>
+                <div class="report-info">INVENTORY REPORT &bull; MULTICARE &bull; AS OF <span id="currentDate"></span></div>
             </div>
 
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
-                <div style="font-size: 24px; font-weight: 900; color: #0056b3; text-transform: uppercase;">
-                    Completesolution <span style="color:#d32f2f">Pharmacy</span>
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Type to filter (Branch, Code, Name)..." onkeyup="filterData()">
                 </div>
-                <div style="font-size: 12px; font-weight: bold; color: #555; margin-top: 5px;">
-                    INVENTORY REPORT &bull; MULTICARE &bull; AS OF <span id="currentDate"></span>
+                <div class="btn-group">
+                    <button onclick="exportReportToExcel()" class="btn-action btn-excel"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    <button onclick="location.reload()" class="btn-action btn-reset"><i class="fas fa-redo"></i> New</button>
                 </div>
             </div>
 
             <div class="dashboard-grid">
                 <div class="stat-card card-blue">
-                    <div class="stat-info">
-                        <h3>Good Stock</h3>
-                        <p id="totalGoodStock">0</p>
-                    </div>
-                    <i class="fas fa-check-circle" style="font-size:40px; color:#0056b3; opacity:0.2;"></i>
+                    <div class="stat-info"><h3>Total Good Stock</h3><p id="totalGoodStock">0</p></div>
+                    <i class="fas fa-box-open stat-icon"></i>
                 </div>
                 <div class="stat-card card-red">
-                    <div class="stat-info">
-                        <h3>Bad Stock</h3>
-                        <p id="totalBadStock">0</p>
-                    </div>
-                    <i class="fas fa-times-circle" style="font-size:40px; color:#dc3545; opacity:0.2;"></i>
+                    <div class="stat-info"><h3>Total Bad Stock</h3><p id="totalBadStock">0</p></div>
+                    <i class="fas fa-trash-alt stat-icon"></i>
                 </div>
             </div>
 
-            <div class="table-responsive" id="mainTableArea"></div>
+            <div class="table-container" id="mainTableArea"></div>
             
-            <h3 style="margin-top: 40px; font-size: 12px; font-weight: bold; color: #0056b3; font-family: Tahoma;">NATIONAL SUMMARY</h3>
-            <div class="table-responsive" id="nationalTableArea"></div>
+            <div class="section-title">NATIONAL SUMMARY (Auto-Calculated)</div>
+            <div class="table-container" id="nationalTableArea"></div>
             
-            <div class="footer">
-                SYSTEM MADE BY GELO &copy; 2025
-            </div>
+            <div class="footer">SYSTEM DEVELOPED BY GELO &copy; 2025</div>
         </div>
     </div>
 
     <script>
-        // --- INTRO ANIMATION ---
+        let allData = []; 
+        let badStockTotal = 0; 
+
+        // --- INTRO SCRIPT ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const intro = document.getElementById('intro-overlay');
                 intro.style.opacity = '0';
-                setTimeout(() => { intro.style.display = 'none'; }, 1000);
-            }, 2000);
+                setTimeout(() => { intro.style.display = 'none'; }, 800);
+            }, 3000); // 3 Seconds animation
         });
 
-        // --- BACKGROUND ANIMATION ---
-        const icons = ['fa-pills', 'fa-capsules', 'fa-syringe', 'fa-first-aid', 'fa-tablets', 'fa-notes-medical', 'fa-prescription-bottle', 'fa-heartbeat'];
+        // Background Particles
         const container = document.getElementById('bgAnimation');
-        for(let i=0; i<25; i++) {
+        const icons = ['fa-pills', 'fa-syringe', 'fa-first-aid', 'fa-tablets'];
+        for(let i=0; i<20; i++) {
             let icon = document.createElement('i');
             icon.className = `fas ${icons[Math.floor(Math.random() * icons.length)]} bg-icon`;
             icon.style.left = Math.random() * 95 + '%';
-            icon.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            icon.style.animationDelay = (Math.random() * 10) + 's';
+            icon.style.animationDuration = (Math.random() * 20 + 15) + 's';
             icon.style.fontSize = (Math.random() * 30 + 20) + 'px';
             container.appendChild(icon);
         }
 
-        // --- MAIN LOGIC ---
+        // --- CORE LOGIC ---
         const today = new Date();
-        document.getElementById('currentDate').innerText = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
-        
-        document.getElementById('excelInput').addEventListener('change', processExcel);
+        const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+        document.getElementById('currentDate').innerText = dateStr;
 
-        function processExcel(e) {
+        document.getElementById('excelInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = function(event) {
@@ -284,25 +309,20 @@
                 const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                generateReports(jsonData);
+                processInitialData(jsonData);
             };
             reader.readAsArrayBuffer(file);
-        }
+        });
 
         function findValue(row, possibleKeys) {
             for (let key of possibleKeys) { if (row[key] !== undefined) return row[key]; }
             return ''; 
         }
 
-        function generateReports(rawData) {
-            document.getElementById('uploaderState').style.display = 'none';
-            document.getElementById('reportState').classList.remove('hidden');
-            document.getElementById('controlBox').style.display = 'flex';
-
+        function processInitialData(rawData) {
             const excludedKeywords = ['EXPIRED', 'DAMAGE', 'DAMA', 'QUARANTINE', 'BAD ORDER', 'BO', 'REJECT', 'RET'];
-            let processedList = [];
-            let grandTotalGood = 0;
-            let grandTotalBad = 0;
+            allData = [];
+            badStockTotal = 0;
 
             rawData.forEach(row => {
                 let branch = findValue(row, ['Location Code', 'Location', 'Branch']);
@@ -316,10 +336,9 @@
                 }
 
                 if (isBadStock) {
-                    grandTotalBad += qty;
+                    badStockTotal += qty;
                 } else {
-                    grandTotalGood += qty;
-                    processedList.push({
+                    allData.push({
                         branch: branch,
                         code: findValue(row, ['Stock Code', 'Code', 'Item Code']),
                         name: findValue(row, ['Stock Name', 'Name', 'Item Description']),
@@ -331,44 +350,68 @@
                 }
             });
 
-            document.getElementById('totalGoodStock').innerText = grandTotalGood.toLocaleString();
-            document.getElementById('totalBadStock').innerText = grandTotalBad.toLocaleString();
-
-            processedList.sort((a, b) => {
+            allData.sort((a, b) => {
                 const branchA = (a.branch || '').toString().toUpperCase();
                 const branchB = (b.branch || '').toString().toUpperCase();
                 if (branchA !== branchB) return branchA < branchB ? -1 : 1;
                 return (a.code || '').toString().localeCompare((b.code || '').toString());
             });
 
-            // --- MAIN TABLE HTML ---
-            // removed inline 'font-weight: bold' from data rows to ensure Excel respects UNBOLD
-            let mainTableHTML = `
-                <table border="1"> 
-                    <thead>
-                        <tr>
-                            <th style="width:15%;">BRANCH</th>
-                            <th style="width:10%;">CODE</th>
-                            <th style="width:30%;">NAME</th>
-                            <th style="width:8%;">ENDING</th>
-                            <th style="width:8%;">UOM</th>
-                            <th style="width:10%;">LOT NO</th>
-                            <th style="width:10%;">EXPIRY</th>
-                            <th style="width:9%;">REMARKS</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
+            document.getElementById('uploaderState').style.display = 'none';
+            document.getElementById('reportState').classList.remove('hidden');
+            
+            renderUI(allData);
+        }
 
+        function filterData() {
+            const query = document.getElementById('searchInput').value.toUpperCase();
+            const filteredData = allData.filter(item => {
+                return (item.branch && item.branch.toString().toUpperCase().includes(query)) ||
+                       (item.code && item.code.toString().toUpperCase().includes(query)) ||
+                       (item.name && item.name.toString().toUpperCase().includes(query));
+            });
+            renderUI(filteredData);
+        }
+
+        window.deleteRow = function(index) {
+            const itemToDelete = window.currentRenderedData[index];
+            if(confirm(`Delete ${itemToDelete.name}?`)) {
+                allData = allData.filter(i => i !== itemToDelete);
+                filterData();
+            }
+        };
+
+        function renderUI(dataToRender) {
+            window.currentRenderedData = dataToRender; 
+            let goodStockTotal = 0;
             let nationalSummary = {};
-            processedList.forEach(item => {
+
+            let mainHTML = `
+                <table><thead><tr>
+                    <th style="width:5%;">DEL</th>
+                    <th>BRANCH</th>
+                    <th>CODE</th>
+                    <th>NAME</th>
+                    <th>ENDING</th>
+                    <th>UOM</th>
+                    <th>LOT NO</th>
+                    <th>EXPIRY</th>
+                    <th>REMARKS</th>
+                </tr></thead><tbody>`;
+
+            dataToRender.forEach((item, index) => {
+                goodStockTotal += item.qty;
+
                 if (item.code) {
-                    if (!nationalSummary[item.code]) { nationalSummary[item.code] = { name: item.name, uom: item.uom, totalQty: 0 }; }
+                    if (!nationalSummary[item.code]) { 
+                        nationalSummary[item.code] = { name: item.name, uom: item.uom, totalQty: 0 }; 
+                    }
                     nationalSummary[item.code].totalQty += item.qty;
                 }
 
                 let expiryDisplay = '';
                 let remarks = '';
-                let rowStyle = ''; 
+                let rowClass = ''; 
 
                 if (item.rawExpiry) {
                     let expDate = new Date(item.rawExpiry);
@@ -377,126 +420,149 @@
                         let oneYearFromNow = new Date();
                         oneYearFromNow.setFullYear(today.getFullYear() + 1);
                         if (expDate < oneYearFromNow) { 
-                            rowStyle = 'color: #FF0000;'; // Color red, NO BOLD
+                            rowClass = 'text-red'; 
                             remarks = 'NEAR EXPIRY';
                         }
                     } else { expiryDisplay = item.rawExpiry; }
                 }
 
-                mainTableHTML += `
-                    <tr style="${rowStyle}">
+                mainHTML += `
+                    <tr>
+                        <td class="text-center"><button class="btn-delete" onclick="deleteRow(${index})"><i class="fas fa-trash"></i></button></td>
                         <td>${item.branch}</td>
-                        <td class="text-center" style="mso-number-format:'\@'">${item.code}</td>
-                        <td>${item.name}</td>
+                        <td class="text-center">${item.code}</td>
+                        <td style="font-weight:600;">${item.name}</td>
                         <td class="text-center">${item.qty}</td>
                         <td class="text-center">${item.uom}</td>
-                        <td class="text-center" style="mso-number-format:'\@'">${item.lot}</td>
+                        <td class="text-center">${item.lot}</td>
                         <td class="text-center">${expiryDisplay}</td>
-                        <td class="text-center">${remarks}</td>
+                        <td class="text-center ${rowClass}">${remarks}</td>
                     </tr>`;
             });
 
-            mainTableHTML += `
-                <tr class="total-row">
-                    <td colspan="3" class="text-right">GRAND TOTAL:</td>
-                    <td class="text-center">${grandTotalGood}</td>
-                    <td colspan="4" style="background-color: #e9ecef;"></td> 
-                </tr></tbody></table>`;
+            mainHTML += `<tr class="total-row"><td colspan="4" class="text-right">GRAND TOTAL:</td><td class="text-center">${goodStockTotal}</td><td colspan="4"></td></tr></tbody></table>`;
             
-            document.getElementById('mainTableArea').innerHTML = mainTableHTML;
+            document.getElementById('mainTableArea').innerHTML = mainHTML;
+            document.getElementById('totalGoodStock').innerText = goodStockTotal.toLocaleString();
+            document.getElementById('totalBadStock').innerText = badStockTotal.toLocaleString();
 
-            // --- NATIONAL TABLE HTML ---
-            let nationalList = Object.keys(nationalSummary).map(key => ({ code: key, ...nationalSummary[key] }));
-            nationalList.sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
+            let natList = Object.keys(nationalSummary).map(key => ({ code: key, ...nationalSummary[key] }));
+            natList.sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
 
-            let nationalHTML = `
-                <table border="1">
+            let natHTML = `<table><thead><tr><th>CODE</th><th>NAME</th><th>ENDING</th><th>UOM</th></tr></thead><tbody>`;
+            let natTotal = 0;
+
+            natList.forEach(item => {
+                natTotal += item.totalQty;
+                natHTML += `<tr><td class="text-center">${item.code}</td><td>${item.name}</td><td class="text-center" style="font-weight:bold;">${item.totalQty}</td><td class="text-center">${item.uom}</td></tr>`;
+            });
+            natHTML += `<tr class="total-row"><td colspan="2" class="text-right">TOTAL:</td><td class="text-center">${natTotal}</td><td></td></tr></tbody></table>`;
+            
+            document.getElementById('nationalTableArea').innerHTML = natHTML;
+        }
+
+        // --- EXCEL EXPORT (FIXED HEADER & SPACING) ---
+        function exportReportToExcel() {
+            let data = window.currentRenderedData;
+            
+            let tableHTML = `
+                <table border="1" style="font-family: Tahoma; font-size: 8pt; width: 100%;">
                     <thead>
-                        <tr>
-                            <th>CODE</th>
-                            <th>NAME</th>
-                            <th>ENDING</th>
-                            <th>UOM</th>
+                        <tr style="height:30px;">
+                            <th style="background-color:#FFFF00; font-weight:700;">BRANCH</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">CODE</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">NAME</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">ENDING</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">UOM</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">LOT NO</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">EXPIRY</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">REMARKS</th>
                         </tr>
                     </thead>
                     <tbody>`;
             
-            let grandTotalNational = 0;
-            nationalList.forEach(item => {
-                grandTotalNational += item.totalQty;
-                nationalHTML += `
-                    <tr>
-                        <td class="text-center" style="mso-number-format:'\@'">${item.code}</td>
-                        <td>${item.name}</td>
-                        <td class="text-center">${item.totalQty}</td>
-                        <td class="text-center">${item.uom}</td>
+            let grandTotal = 0;
+            let natSummary = {};
+
+            data.forEach(item => {
+                grandTotal += item.qty;
+                if (item.code) {
+                    if (!natSummary[item.code]) { natSummary[item.code] = { name: item.name, uom: item.uom, totalQty: 0 }; }
+                    natSummary[item.code].totalQty += item.qty;
+                }
+
+                let expiryDisplay = '';
+                let remarks = '';
+                let style = '';
+
+                if (item.rawExpiry) {
+                    let expDate = new Date(item.rawExpiry);
+                    if (!isNaN(expDate)) {
+                        expiryDisplay = expDate.toLocaleDateString('en-US');
+                        let oneYearFromNow = new Date();
+                        oneYearFromNow.setFullYear(today.getFullYear() + 1);
+                        if (expDate < oneYearFromNow) { 
+                            style = 'color:#FF0000;'; 
+                            remarks = 'NEAR EXPIRY';
+                        }
+                    } else { expiryDisplay = item.rawExpiry; }
+                }
+
+                tableHTML += `
+                    <tr style="${style} height:20px;">
+                        <td style="vertical-align:middle; padding:5px;">${item.branch}</td>
+                        <td style="vertical-align:middle; text-align:center; mso-number-format:'\@';">${item.code}</td>
+                        <td style="vertical-align:middle;">${item.name}</td>
+                        <td style="vertical-align:middle; text-align:center;">${item.qty}</td>
+                        <td style="vertical-align:middle; text-align:center;">${item.uom}</td>
+                        <td style="vertical-align:middle; text-align:center; mso-number-format:'\@';">${item.lot}</td>
+                        <td style="vertical-align:middle; text-align:center;">${expiryDisplay}</td>
+                        <td style="vertical-align:middle; text-align:center;">${remarks}</td>
                     </tr>`;
             });
-            nationalHTML += `
-                <tr class="total-row">
-                    <td colspan="2" class="text-right">TOTAL:</td>
-                    <td class="text-center">${grandTotalNational}</td>
-                    <td style="background-color: #e9ecef;"></td>
-                </tr></tbody></table>`;
 
-            document.getElementById('nationalTableArea').innerHTML = nationalHTML;
-        }
+            tableHTML += `<tr style="background-color:#e0e0e0; font-weight:bold; height:25px;"><td colspan="3" style="text-align:right;">GRAND TOTAL:</td><td style="text-align:center;">${grandTotal}</td><td colspan="4"></td></tr></tbody></table>`;
 
-        // --- EXCEL EXPORT (FIXED FOR BOLD/UNBOLD) ---
-        function exportReportToExcel() {
-            var content = document.getElementById('reportState').innerHTML;
+            let natList = Object.keys(natSummary).map(key => ({ code: key, ...natSummary[key] }));
+            natList.sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
+            let natTotal = 0;
+
+            let natHTML = `
+                <br><br>
+                <div style="font-weight:bold; font-family:Tahoma; font-size:10pt; color:#000;">NATIONAL SUMMARY (GOOD STOCK ONLY)</div>
+                <table border="1" style="font-family: Tahoma; font-size: 8pt; width: 100%;">
+                    <thead>
+                        <tr style="height:30px;">
+                            <th style="background-color:#FFFF00; font-weight:700;">CODE</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">NAME</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">ENDING</th>
+                            <th style="background-color:#FFFF00; font-weight:700;">UOM</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
             
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var controls = tempDiv.querySelector('.controls');
-            if(controls) controls.remove();
-            var dashboard = tempDiv.querySelector('.dashboard-grid');
-            if(dashboard) dashboard.remove(); 
-            var footer = tempDiv.querySelector('.footer');
-            if(footer) footer.remove();
+            natList.forEach(item => {
+                natTotal += item.totalQty;
+                natHTML += `<tr style="height:20px;"><td style="text-align:center; mso-number-format:'\@';">${item.code}</td><td>${item.name}</td><td style="text-align:center; font-weight:bold;">${item.totalQty}</td><td style="text-align:center;">${item.uom}</td></tr>`;
+            });
+            natHTML += `<tr style="background-color:#e0e0e0; font-weight:bold; height:25px;"><td colspan="2" style="text-align:right;">TOTAL:</td><td style="text-align:center;">${natTotal}</td><td></td></tr></tbody></table>`;
 
-            var finalContent = tempDiv.innerHTML
-                .replace('<div class="table-responsive" id="mainTableArea">', '<br><div id="mainTableArea">')
-                .replace('<h3', '<br><br><h3');
-
-            // --- CSS TO FORCE EXCEL STYLING ---
             var template = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
                 <head>
                     <meta charset="UTF-8">
-                    <style>
-                        /* GLOBAL */
-                        body { font-family: 'Tahoma', sans-serif; font-size: 8pt; }
-                        table { border-collapse: collapse; width: 100%; margin-top: 10px; font-family: 'Tahoma', sans-serif; }
-                        
-                        /* HEADER: BOLD (700) */
-                        th { 
-                            background-color: #FFFF00; 
-                            border: 1px solid black; 
-                            font-weight: 700 !important; 
-                            text-align: center; 
-                            font-size: 8pt; 
-                            height: 30px; 
-                            font-family: 'Tahoma', sans-serif;
-                        }
-                        
-                        /* DATA: UNBOLD (400) */
-                        td { 
-                            border: 1px solid black; 
-                            vertical-align: middle; 
-                            padding: 4px; 
-                            font-size: 8pt; 
-                            font-weight: 400 !important; 
-                            font-family: 'Tahoma', sans-serif;
-                        }
-                        
-                        .text-center { text-align: center; }
-                        .text-right { text-align: right; }
-                        .total-row { background-color: #e9ecef; font-weight: bold; font-size: 9pt; }
-                    </style>
-                </head>
+                    </head>
                 <body>
-                    ${finalContent}
+                    <div style="text-align:center; margin-bottom:30px;">
+                        <span style="font-family:Arial; font-size:24pt; font-weight:bold; color:#0056b3;">Completesolution</span>
+                        <span style="font-family:Arial; font-size:24pt; font-weight:bold; color:#d32f2f;">Pharmacy</span>
+                        <br><br> <div style="font-family:Arial; font-size:12pt; font-weight:bold; color:#000;">
+                            INVENTORY REPORT &#8226; MULTICARE &#8226; AS OF ${dateStr}
+                        </div>
+                    </div>
+                    <br>
+                    ${tableHTML}
+                    ${natHTML}
                 </body>
                 </html>`;
 
