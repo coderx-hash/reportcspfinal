@@ -9,20 +9,55 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- GLOBAL STYLES --- */
+        /* --- GLOBAL RESET --- */
         * { box-sizing: border-box; }
         
         body { 
-            font-family: 'Tahoma', sans-serif; /* Screen Font */
+            font-family: 'Tahoma', sans-serif; /* STRICT TAHOMA */
             margin: 0; 
-            padding: 20px; 
+            padding: 0;
             color: #333;
             background: #eef2f5;
+            
+            /* --- CENTERING MAGIC FOR DESKTOP --- */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center; 
+            justify-content: center; /* Center Vertically */
+            align-items: center;     /* Center Horizontally */
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- BACKGROUND ANIMATION (Lumalabas na Gamot) --- */
+        .bg-animation {
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            z-index: -1; 
+            overflow: hidden;
+            pointer-events: none;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        }
+
+        .bg-icon {
+            position: absolute; 
+            color: rgba(0, 86, 179, 0.08); /* Subtle Blue Tint */
+            bottom: -100px;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { 
+                transform: translateY(0) rotate(0deg) scale(0.8); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(-110vh) rotate(360deg) scale(1.2); 
+                opacity: 0; 
+            }
         }
 
         /* --- INTRO ANIMATION --- */
@@ -44,124 +79,137 @@
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeIn { to { opacity: 1; } }
 
-        /* --- BACKGROUND ANIMATION --- */
-        .bg-animation {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-        }
-        .bg-icon {
-            position: absolute; color: rgba(0, 86, 179, 0.05);
-            animation: floatUp 20s linear infinite; bottom: -100px;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
-        }
-
-        /* --- FLOATING CARD --- */
+        /* --- FLOATING CARD (CENTERED) --- */
         .floating-card {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 900px; 
-            padding: 40px;
-            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1000px; 
+            padding: 50px;
             border: 1px solid rgba(255,255,255,0.8);
             position: relative;
+            
+            /* Animation Entrance */
             animation: slideUp 0.8s ease-out;
+            
+            /* Ensure spacing if content grows */
+            margin: 40px auto; 
         }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* --- UPLOADER --- */
-        .uploader-content { text-align: center; }
+        @keyframes slideUp { 
+            from { transform: translateY(50px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+
+        /* --- UPLOADER SECTION --- */
+        .uploader-content { 
+            text-align: center; 
+            padding: 20px;
+        }
         .upload-icon { 
-            font-size: 60px; 
+            font-size: 80px; 
             background: linear-gradient(45deg, #0056b3, #00d2ff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 5px 15px rgba(0, 86, 179, 0.2));
         }
         .btn-upload { 
             background: linear-gradient(90deg, #0056b3, #004494);
             color: white; padding: 15px 50px; 
             border-radius: 50px; cursor: pointer; font-weight: bold; 
             display: inline-block; margin-top: 25px; 
-            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.3); transition: all 0.3s;
+            font-size: 16px; letter-spacing: 1px;
+            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.3); 
+            transition: all 0.3s;
         }
-        .btn-upload:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0, 86, 179, 0.4); }
+        .btn-upload:hover { 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 15px 35px rgba(0, 86, 179, 0.4); 
+        }
         input[type="file"] { display: none; }
 
-        /* --- DASHBOARD --- */
+        /* --- DASHBOARD STATS --- */
         .dashboard-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px; margin-bottom: 30px;
         }
         .stat-card {
-            background: #f8f9fa; padding: 20px; border-radius: 15px;
-            border-left: 5px solid #ccc; display: flex; align-items: center; justify-content: space-between;
+            background: #f8f9fa; padding: 25px; border-radius: 15px;
+            border-left: 6px solid #ccc; 
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         .card-blue { border-left-color: #0056b3; background: #e3f2fd; }
         .card-red { border-left-color: #dc3545; background: #ffebee; }
         .stat-info h3 { margin: 0; font-size: 12px; text-transform: uppercase; color: #555; letter-spacing: 1px; font-weight: bold; }
-        .stat-info p { margin: 5px 0 0; font-size: 24px; font-weight: 800; color: #333; }
+        .stat-info p { margin: 5px 0 0; font-size: 28px; font-weight: 800; color: #333; }
 
-        /* --- SCREEN TABLE STYLES --- */
+        /* --- TABLE STYLES (STRICT TAHOMA 8) --- */
         .table-responsive {
-            width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #eee;
+            width: 100%; overflow-x: auto; 
+            border-radius: 8px; border: 1px solid #eee;
+            margin-bottom: 20px;
         }
 
         table { 
             width: 100%; 
             border-collapse: collapse; 
             font-family: 'Tahoma', sans-serif;
-            min-width: 800px;
+            min-width: 800px; /* Ensures layout integrity */
         }
 
-        /* These styles affect the screen view */
         th { 
             background-color: #FFFF00; 
             border: 1px solid #333; 
             padding: 8px; 
             text-align: center; 
-            font-weight: bold; 
             color: #000;
-            font-size: 11px; 
+            
+            /* TAHOMA SIZE 8 BOLD */
+            font-family: 'Tahoma', sans-serif;
+            font-size: 8pt; 
+            font-weight: bold; 
         }
 
         td { 
             border: 1px solid #333; 
             padding: 6px; 
             vertical-align: middle;
-            font-size: 11px;
+            
+            /* TAHOMA SIZE 8 UNBOLD */
+            font-family: 'Tahoma', sans-serif;
+            font-size: 8pt; 
+            font-weight: normal; 
         }
 
-        .total-row { background-color: #e9ecef; font-weight: bold; font-size: 12px; }
-        
+        .total-row { background-color: #e9ecef; font-weight: bold; font-size: 9pt; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .hidden { display: none; }
 
         /* --- CONTROLS --- */
-        .controls { display: none; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .controls { display: none; justify-content: center; gap: 15px; margin-bottom: 30px; }
         .btn-action { 
-            border: none; padding: 10px 25px; cursor: pointer; 
-            border-radius: 30px; font-weight: bold; font-size: 12px;
+            border: none; padding: 12px 30px; cursor: pointer; 
+            border-radius: 30px; font-weight: bold; font-size: 13px;
             display: flex; align-items: center; gap: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
         }
         .btn-excel { background: #107c41; color: white; } 
-        .btn-reset { background: white; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-reset { background: white; color: #dc3545; border: 2px solid #dc3545; }
         .btn-action:hover { transform: translateY(-2px); }
 
         /* --- FOOTER --- */
-        .footer { margin-top: auto; padding: 20px; font-size: 10px; color: #999; font-weight: bold; letter-spacing: 1px; }
-
-        @media (max-width: 768px) {
-            .floating-card { padding: 20px; width: 100%; margin-top: 10px; }
-            .intro-logo { font-size: 24px; }
-            .btn-upload { width: 100%; }
+        .footer { 
+            margin-top: 40px; 
+            padding-bottom: 20px;
+            font-size: 10px; color: #999; 
+            font-weight: bold; letter-spacing: 1px; 
+            text-align: center;
         }
+
     </style>
 </head>
 <body>
@@ -173,88 +221,95 @@
 
     <div class="bg-animation" id="bgAnimation"></div>
 
-    <div class="floating-card" id="uploaderCard">
-        <div class="uploader-content">
+    <div class="floating-card" id="mainCard">
+        
+        <div id="uploaderState" class="uploader-content">
             <i class="fas fa-file-invoice upload-icon"></i>
-            <h2 style="margin: 10px 0; color: #333; font-weight:800; font-size: 24px;">INVENTORY DASHBOARD</h2>
-            <p style="color: #666; font-size: 12px; margin-bottom: 30px;">
-                Excel Settings: <b>Tahoma Size 8</b><br>
-                <b>Bold Headers</b> | <b>Unbold Data</b>
+            <h2 style="margin: 10px 0; color: #333; font-weight:800; font-size: 28px;">INVENTORY DASHBOARD</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 40px; font-family: Tahoma;">
+                Please upload your inventory file to begin.<br>
+                <span style="font-size: 11px; opacity: 0.7;">(Settings: Tahoma 8, Bold Headers, Unbold Data)</span>
             </p>
             
             <label for="excelInput" class="btn-upload">
-                <i class="fas fa-cloud-upload-alt"></i> SELECT FILE
+                <i class="fas fa-cloud-upload-alt"></i> UPLOAD EXCEL FILE
             </label>
             <input type="file" id="excelInput" accept=".xlsx, .xls">
         </div>
-    </div>
 
-    <div class="controls" id="controlBox">
-        <button onclick="exportReportToExcel()" class="btn-action btn-excel">
-            <i class="fas fa-download"></i> Download Excel
-        </button>
-        <button onclick="location.reload()" class="btn-action btn-reset">
-            <i class="fas fa-redo"></i> Reset
-        </button>
-    </div>
-
-    <div class="floating-card hidden" id="reportCard">
-        
-        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
-            <div style="font-size: 24px; font-weight: 900; color: #0056b3; text-transform: uppercase;">
-                Completesolution <span style="color:#d32f2f">Pharmacy</span>
+        <div id="reportState" class="hidden">
+            
+            <div class="controls" id="controlBox">
+                <button onclick="exportReportToExcel()" class="btn-action btn-excel">
+                    <i class="fas fa-download"></i> Download Excel
+                </button>
+                <button onclick="location.reload()" class="btn-action btn-reset">
+                    <i class="fas fa-redo"></i> Reset / New
+                </button>
             </div>
-            <div style="font-size: 12px; font-weight: bold; color: #555; margin-top: 5px;">
-                INVENTORY REPORT &bull; MULTICARE &bull; AS OF <span id="currentDate"></span>
+
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+                <div style="font-size: 24px; font-weight: 900; color: #0056b3; text-transform: uppercase;">
+                    Completesolution <span style="color:#d32f2f">Pharmacy</span>
+                </div>
+                <div style="font-size: 12px; font-weight: bold; color: #555; margin-top: 5px;">
+                    INVENTORY REPORT &bull; MULTICARE &bull; AS OF <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card card-blue">
+                    <div class="stat-info">
+                        <h3>Good Stock</h3>
+                        <p id="totalGoodStock">0</p>
+                    </div>
+                    <i class="fas fa-check-circle" style="font-size:40px; color:#0056b3; opacity:0.2;"></i>
+                </div>
+                <div class="stat-card card-red">
+                    <div class="stat-info">
+                        <h3>Bad Stock</h3>
+                        <p id="totalBadStock">0</p>
+                    </div>
+                    <i class="fas fa-times-circle" style="font-size:40px; color:#dc3545; opacity:0.2;"></i>
+                </div>
+            </div>
+
+            <div class="table-responsive" id="mainTableArea"></div>
+            
+            <h3 style="margin-top: 40px; font-size: 12px; font-weight: bold; color: #0056b3; font-family: Tahoma;">NATIONAL SUMMARY</h3>
+            <div class="table-responsive" id="nationalTableArea"></div>
+            
+            <div class="footer">
+                SYSTEM MADE BY GELO &copy; 2025
             </div>
         </div>
-
-        <div class="dashboard-grid">
-            <div class="stat-card card-blue">
-                <div class="stat-info">
-                    <h3>Good Stock</h3>
-                    <p id="totalGoodStock">0</p>
-                </div>
-                <i class="fas fa-check-circle" style="font-size:30px; color:#0056b3; opacity:0.3;"></i>
-            </div>
-            <div class="stat-card card-red">
-                <div class="stat-info">
-                    <h3>Bad Stock</h3>
-                    <p id="totalBadStock">0</p>
-                </div>
-                <i class="fas fa-times-circle" style="font-size:30px; color:#dc3545; opacity:0.3;"></i>
-            </div>
-        </div>
-
-        <div class="table-responsive" id="mainTableArea"></div>
-        
-        <h3 style="margin-top: 40px; font-size: 12px; font-weight: bold; color: #0056b3;">NATIONAL SUMMARY</h3>
-        <div class="table-responsive" id="nationalTableArea"></div>
-
-    </div>
-
-    <div class="footer">
-        SYSTEM MADE BY GELO &copy; 2025
     </div>
 
     <script>
-        // --- ANIMATIONS ---
+        // --- INTRO ANIMATION ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const intro = document.getElementById('intro-overlay');
                 intro.style.opacity = '0';
                 setTimeout(() => { intro.style.display = 'none'; }, 1000);
-            }, 2000);
+            }, 2500);
         });
 
-        const icons = ['fa-pills', 'fa-syringe', 'fa-first-aid', 'fa-tablets', 'fa-notes-medical'];
+        // --- BACKGROUND ANIMATION (MORE ICONS) ---
+        const icons = ['fa-pills', 'fa-capsules', 'fa-syringe', 'fa-first-aid', 'fa-tablets', 'fa-notes-medical', 'fa-prescription-bottle', 'fa-heartbeat'];
         const container = document.getElementById('bgAnimation');
-        for(let i=0; i<15; i++) {
+        
+        // Generate 25 icons for full background effect
+        for(let i=0; i<25; i++) {
             let icon = document.createElement('i');
             icon.className = `fas ${icons[Math.floor(Math.random() * icons.length)]} bg-icon`;
-            icon.style.left = Math.random() * 100 + '%';
-            icon.style.animationDuration = (Math.random() * 15 + 15) + 's';
-            icon.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            
+            // Random positioning and timing
+            icon.style.left = Math.random() * 95 + '%';
+            icon.style.animationDuration = (Math.random() * 15 + 10) + 's'; // 10-25s duration
+            icon.style.animationDelay = (Math.random() * 10) + 's';
+            icon.style.fontSize = (Math.random() * 30 + 20) + 'px'; // Random size
+            
             container.appendChild(icon);
         }
 
@@ -283,8 +338,9 @@
         }
 
         function generateReports(rawData) {
-            document.getElementById('uploaderCard').style.display = 'none';
-            document.getElementById('reportCard').classList.remove('hidden');
+            // UI Switch
+            document.getElementById('uploaderState').style.display = 'none';
+            document.getElementById('reportState').classList.remove('hidden');
             document.getElementById('controlBox').style.display = 'flex';
 
             const excludedKeywords = ['EXPIRED', 'DAMAGE', 'DAMA', 'QUARANTINE', 'BAD ORDER', 'BO', 'REJECT', 'RET'];
@@ -330,7 +386,6 @@
             });
 
             // --- MAIN TABLE ---
-            // NOTE: We use simple HTML here. The EXCEL styling is handled in the Export Function.
             let mainTableHTML = `
                 <table border="1"> 
                     <thead>
@@ -430,50 +485,54 @@
             document.getElementById('nationalTableArea').innerHTML = nationalHTML;
         }
 
-        // --- EXCEL EXPORT (THE MAGIC FIX) ---
+        // --- EXCEL EXPORT (STRICT RULES) ---
         function exportReportToExcel() {
-            var content = document.getElementById('reportCard').innerHTML;
+            var content = document.getElementById('reportState').innerHTML;
             
-            // Clean up content
+            // Clean up: Remove controls and dashboard stats for the excel file
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
+            var controls = tempDiv.querySelector('.controls');
+            if(controls) controls.remove();
             var dashboard = tempDiv.querySelector('.dashboard-grid');
             if(dashboard) dashboard.remove(); 
+            var footer = tempDiv.querySelector('.footer');
+            if(footer) footer.remove();
 
             var finalContent = tempDiv.innerHTML
                 .replace('<div class="table-responsive" id="mainTableArea">', '<br><div id="mainTableArea">')
                 .replace('<h3', '<br><br><h3');
 
-            // --- STRICT CSS FOR EXCEL ---
-            // This explicit style block tells Excel exactly how to render bold/unbold
+            // --- THE EXCEL TEMPLATE WITH STRICT CSS ---
             var template = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
                 <head>
                     <meta charset="UTF-8">
                     <style>
-                        /* BODY DEFAULT */
+                        /* 1. Global Font */
                         body { font-family: 'Tahoma', sans-serif; font-size: 8pt; }
                         
+                        /* 2. Table Reset */
                         table { border-collapse: collapse; width: 100%; margin-top: 10px; font-family: 'Tahoma', sans-serif; }
                         
-                        /* HEADER (TH) -> BOLD */
+                        /* 3. HEADERS: BOLD, YELLOW, TAHOMA 8 */
                         th { 
                             background-color: #FFFF00; 
                             border: 1px solid black; 
-                            font-weight: 700 !important; /* STRICT BOLD */
+                            font-weight: 700; /* BOLD */
                             text-align: center; 
                             font-size: 8pt; 
                             height: 30px; 
                             font-family: 'Tahoma', sans-serif;
                         }
                         
-                        /* DATA (TD) -> UNBOLD */
+                        /* 4. DATA: UNBOLD, TAHOMA 8 */
                         td { 
                             border: 1px solid black; 
                             vertical-align: middle; 
                             padding: 4px; 
                             font-size: 8pt; 
-                            font-weight: 400 !important; /* STRICT NORMAL/UNBOLD */
+                            font-weight: 400; /* NORMAL/UNBOLD */
                             font-family: 'Tahoma', sans-serif;
                         }
                         
