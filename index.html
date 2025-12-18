@@ -180,21 +180,9 @@
             }
         }
 
-        .loader-bar {
-            width: 200px; height: 4px; background: #f1f5f9; border-radius: 4px;
-            margin: 30px auto 0; overflow: hidden;
-            opacity: 0; animation: fadeUp 0.5s ease forwards 1.8s; /* Delayed appearance */
-        }
-        
-        .loader-fill {
-            height: 100%; width: 0%; background: var(--brand-blue); border-radius: 4px;
-            animation: loading 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--primary-glow)); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
 
         .intro-exit { transform: translateY(-100%); }
 
@@ -490,8 +478,7 @@
                 <span class="falling-char" style="--i:14; color:var(--brand-blue)">O</span>
             </div>
 
-            <div class="loader-bar"><div class="loader-fill"></div></div>
-        </div>
+            </div>
     </div>
 
     <div class="app-shell" id="appShell">
@@ -508,7 +495,7 @@
                 <input type="file" id="excelInput" accept=".xlsx, .xls" class="file-input-hidden">
                 
             </div>
-            </div>
+        </div>
 
         <div id="dashboardView" class="hidden">
             
@@ -606,7 +593,7 @@
                 }, 300);
 
                 setTimeout(() => { intro.style.display = 'none'; }, 1000);
-            }, 3000); // Increased time slightly to enjoy the falling text
+            }, 3000); 
         });
 
         // --- DATE SETTING ---
