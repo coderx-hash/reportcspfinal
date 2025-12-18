@@ -137,35 +137,53 @@
             opacity: 0; animation: fadeUp 0.8s ease forwards 0.5s;
         }
 
-        /* --- CREDIT ANIMATION (GELO) --- */
-        .intro-credit {
-            position: absolute;
-            bottom: 50px; /* Position at bottom */
+        /* --- ASTIG NA DESIGNED BY GELO ANIMATION --- */
+        .intro-credits {
+            margin-top: 40px;
             font-family: 'Outfit', sans-serif;
-            font-size: 12px;
             font-weight: 800;
-            color: var(--brand-blue);
-            letter-spacing: 2px;
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            gap: 3px;
             text-transform: uppercase;
-            
-            /* Initial State */
-            opacity: 0;
-            transform: scale(0.5);
-            
-            /* The "Maangas" Pop Animation */
-            animation: geloPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s;
         }
 
-        @keyframes geloPop {
-            0% { opacity: 0; transform: scale(0.5) translateY(20px); }
-            70% { opacity: 1; transform: scale(1.1) translateY(0); } /* Overshoot for bounce */
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+        .falling-char {
+            display: inline-block;
+            opacity: 0;
+            /* Ang animation ay nagpapabigat ng dating */
+            animation: letterDrop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            /* Staggered delay based on variable --i */
+            animation-delay: calc(1s + (var(--i) * 0.05s));
+        }
+
+        /* Space between DESIGNED and BY and GELO */
+        .spacer { width: 8px; }
+
+        @keyframes letterDrop {
+            0% { 
+                transform: translateY(-200px) scale(3); 
+                opacity: 0; 
+                filter: blur(10px);
+            }
+            70% {
+                transform: translateY(10px) scale(0.9); /* Overshoot/Squash effect */
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+                filter: blur(0);
+            }
         }
 
         .loader-bar {
             width: 200px; height: 4px; background: #f1f5f9; border-radius: 4px;
             margin: 30px auto 0; overflow: hidden;
-            opacity: 0; animation: fadeUp 0.5s ease forwards 0.7s;
+            opacity: 0; animation: fadeUp 0.5s ease forwards 1.8s; /* Delayed appearance */
         }
         
         .loader-fill {
@@ -208,7 +226,7 @@
             background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, rgba(240,245,255,0.4) 100%);
             transition: all 0.3s ease; cursor: pointer;
             position: relative; overflow: hidden;
-            user-select: none; 
+            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         .drop-zone:hover, .drop-zone:active {
@@ -239,17 +257,12 @@
             cursor: pointer;
             position: relative;
             z-index: 10;
-            pointer-events: none; 
+            pointer-events: none;
         }
         .drop-zone:hover .btn-browse { background: var(--brand-blue); box-shadow: 0 10px 25px var(--primary-glow); }
 
         .file-input-hidden {
-            position: absolute;
-            width: 0.1px;
-            height: 0.1px;
-            opacity: 0;
-            overflow: hidden;
-            z-index: -1;
+            position: absolute; width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; z-index: -1;
         }
 
         /* --- DASHBOARD VIEW --- */
@@ -453,9 +466,32 @@
             </div>
             <div class="intro-title">Completesolution <span style="color:var(--brand-red)">Pharmacy</span></div>
             <div class="intro-sub">Next-Gen Inventory System</div>
+            
+            <div class="intro-credits">
+                <span class="falling-char" style="--i:1">D</span>
+                <span class="falling-char" style="--i:2">E</span>
+                <span class="falling-char" style="--i:3">S</span>
+                <span class="falling-char" style="--i:4">I</span>
+                <span class="falling-char" style="--i:5">G</span>
+                <span class="falling-char" style="--i:6">N</span>
+                <span class="falling-char" style="--i:7">E</span>
+                <span class="falling-char" style="--i:8">D</span>
+                
+                <span class="spacer"></span>
+                
+                <span class="falling-char" style="--i:9">B</span>
+                <span class="falling-char" style="--i:10">Y</span>
+
+                <span class="spacer"></span>
+
+                <span class="falling-char" style="--i:11; color:var(--brand-blue)">G</span>
+                <span class="falling-char" style="--i:12; color:var(--brand-blue)">E</span>
+                <span class="falling-char" style="--i:13; color:var(--brand-blue)">L</span>
+                <span class="falling-char" style="--i:14; color:var(--brand-blue)">O</span>
+            </div>
+
             <div class="loader-bar"><div class="loader-fill"></div></div>
         </div>
-        <div class="intro-credit">DESIGNED BY GELO</div>
     </div>
 
     <div class="app-shell" id="appShell">
@@ -472,7 +508,7 @@
                 <input type="file" id="excelInput" accept=".xlsx, .xls" class="file-input-hidden">
                 
             </div>
-        </div>
+            </div>
 
         <div id="dashboardView" class="hidden">
             
@@ -560,6 +596,7 @@
 
         // --- ANIMATION CONTROLLER ---
         window.addEventListener('load', () => {
+            // Intro takes about 3s total to let the falling text animation finish
             setTimeout(() => {
                 const intro = document.getElementById('intro-overlay');
                 intro.classList.add('intro-exit'); 
@@ -569,7 +606,7 @@
                 }, 300);
 
                 setTimeout(() => { intro.style.display = 'none'; }, 1000);
-            }, 3000); // Increased slightly so you can see the name pop
+            }, 3000); // Increased time slightly to enjoy the falling text
         });
 
         // --- DATE SETTING ---
@@ -590,9 +627,11 @@
                 processInitialData(jsonData);
             };
             reader.readAsArrayBuffer(file);
-            this.value = null; 
+            
+            this.value = null; // Reset for re-upload
         });
 
+        // --- FIXED: Case Insensitive Finder ---
         function findValue(row, possibleKeys) {
             const rowKeys = Object.keys(row);
             for (let key of possibleKeys) {
