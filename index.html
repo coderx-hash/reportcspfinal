@@ -137,6 +137,31 @@
             opacity: 0; animation: fadeUp 0.8s ease forwards 0.5s;
         }
 
+        /* --- CREDIT ANIMATION (GELO) --- */
+        .intro-credit {
+            position: absolute;
+            bottom: 50px; /* Position at bottom */
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--brand-blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            
+            /* Initial State */
+            opacity: 0;
+            transform: scale(0.5);
+            
+            /* The "Maangas" Pop Animation */
+            animation: geloPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s;
+        }
+
+        @keyframes geloPop {
+            0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+            70% { opacity: 1; transform: scale(1.1) translateY(0); } /* Overshoot for bounce */
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         .loader-bar {
             width: 200px; height: 4px; background: #f1f5f9; border-radius: 4px;
             margin: 30px auto 0; overflow: hidden;
@@ -183,7 +208,7 @@
             background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, rgba(240,245,255,0.4) 100%);
             transition: all 0.3s ease; cursor: pointer;
             position: relative; overflow: hidden;
-            user-select: none; /* Prevents text selection on double click */
+            user-select: none; 
             -webkit-tap-highlight-color: transparent;
         }
         .drop-zone:hover, .drop-zone:active {
@@ -214,11 +239,10 @@
             cursor: pointer;
             position: relative;
             z-index: 10;
-            pointer-events: none; /* FIXED: Clicks pass through to drop-zone */
+            pointer-events: none; 
         }
         .drop-zone:hover .btn-browse { background: var(--brand-blue); box-shadow: 0 10px 25px var(--primary-glow); }
 
-        /* FIXED: Mobile friendly file input style */
         .file-input-hidden {
             position: absolute;
             width: 0.1px;
@@ -431,6 +455,7 @@
             <div class="intro-sub">Next-Gen Inventory System</div>
             <div class="loader-bar"><div class="loader-fill"></div></div>
         </div>
+        <div class="intro-credit">DESIGNED BY GELO</div>
     </div>
 
     <div class="app-shell" id="appShell">
@@ -447,7 +472,6 @@
                 <input type="file" id="excelInput" accept=".xlsx, .xls" class="file-input-hidden">
                 
             </div>
-            <div style="margin-top: 30px; font-size: 11px; color: var(--text-light); font-weight: 700; letter-spacing: 1px;">DESIGNED BY GELO</div>
         </div>
 
         <div id="dashboardView" class="hidden">
@@ -545,7 +569,7 @@
                 }, 300);
 
                 setTimeout(() => { intro.style.display = 'none'; }, 1000);
-            }, 2500);
+            }, 3000); // Increased slightly so you can see the name pop
         });
 
         // --- DATE SETTING ---
@@ -555,7 +579,7 @@
         // --- FILE HANDLING ---
         document.getElementById('excelInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (!file) return; // Fix for cancel button
+            if (!file) return; 
             
             const reader = new FileReader();
             reader.onload = function(event) {
@@ -566,16 +590,12 @@
                 processInitialData(jsonData);
             };
             reader.readAsArrayBuffer(file);
-            
-            // FIXED: Reset value so you can upload the same file again if needed
             this.value = null; 
         });
 
-        // --- FIXED: Case Insensitive Finder ---
         function findValue(row, possibleKeys) {
             const rowKeys = Object.keys(row);
             for (let key of possibleKeys) {
-                // Find a key in the row that matches strictly or strictly (case-insensitive)
                 const match = rowKeys.find(k => k.trim().toUpperCase() === key.toUpperCase());
                 if (match) return row[match];
             }
@@ -607,7 +627,6 @@
                         name: findValue(row, ['Stock Name', 'Name', 'Item Description']),
                         qty: qty,
                         uom: findValue(row, ['UOM', 'Unit']),
-                        // FIXED: Added more variations for Lot Number
                         lot: findValue(row, ['Stock Batch No', 'Lot No', 'Lot', 'Batch', 'Batch No', 'Batch Number', 'Lot Number', 'Lot #']),
                         rawExpiry: findValue(row, ['Expiry', 'Expiry Date'])
                     });
