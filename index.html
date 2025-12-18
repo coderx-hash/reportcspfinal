@@ -183,8 +183,10 @@
             background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, rgba(240,245,255,0.4) 100%);
             transition: all 0.3s ease; cursor: pointer;
             position: relative; overflow: hidden;
+            user-select: none; /* Prevents text selection on double click */
+            -webkit-tap-highlight-color: transparent;
         }
-        .drop-zone:hover {
+        .drop-zone:hover, .drop-zone:active {
             border-color: var(--brand-blue); transform: translateY(-5px);
             box-shadow: 0 25px 50px -10px var(--primary-glow);
         }
@@ -209,11 +211,12 @@
             display: inline-flex; align-items: center; gap: 10px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             transition: 0.2s;
-            cursor: pointer; /* Important for mobile tap */
+            cursor: pointer;
             position: relative;
             z-index: 10;
+            pointer-events: none; /* FIXED: Clicks pass through to drop-zone */
         }
-        .btn-browse:hover { background: var(--brand-blue); box-shadow: 0 10px 25px var(--primary-glow); }
+        .drop-zone:hover .btn-browse { background: var(--brand-blue); box-shadow: 0 10px 25px var(--primary-glow); }
 
         /* FIXED: Mobile friendly file input style */
         .file-input-hidden {
@@ -438,9 +441,9 @@
                 <h1 class="upload-h1">Import Inventory</h1>
                 <p class="upload-p">Drag and drop your Excel file here.<br>We'll auto-detect expiration & bad stocks.</p>
                 
-                <label for="excelInput" class="btn-browse">
+                <div class="btn-browse">
                     <i class="fas fa-folder-open"></i> Select Excel File
-                </label>
+                </div>
                 <input type="file" id="excelInput" accept=".xlsx, .xls" class="file-input-hidden">
                 
             </div>
@@ -563,6 +566,9 @@
                 processInitialData(jsonData);
             };
             reader.readAsArrayBuffer(file);
+            
+            // FIXED: Reset value so you can upload the same file again if needed
+            this.value = null; 
         });
 
         // --- FIXED: Case Insensitive Finder ---
